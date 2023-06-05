@@ -25,19 +25,7 @@ app.post('/user', async (req , res) =>{
 
 });
 
-//Dohvati sve korisnike
-app.get('/users', async (req , res) =>{
-    let db = await connect();
-    let cursor = await db.collection('users').find({});
-    let results = await cursor.toArray();
-    res.json(results);
-});
-
-app.get('/secret', [Auth.verify], (req,res) => {
-    res.json({message: "This is a secret" + req.jwt.email})
-})
-
-//Autenticiraj ukoliko već postoji korisnik
+//Prijava
 app.post('/login', async (req, res) =>{
     let user = await req.body;
     let userEmail = user.email 
@@ -52,6 +40,39 @@ app.post('/login', async (req, res) =>{
     }
 })
 
+//Dohvat svih korisnika iz baze
+app.get('/users', async (req , res) =>{
+    let db = await connect();
+    let cursor = await db.collection('users').find({});
+    let results = await cursor.toArray();
+    res.json(results);
+});
 
+app.get('/secret', [Auth.verify], (req,res) => {
+    res.json({message: "This is a secret" + req.jwt.email})
+})
 
-app.listen(port, () => console.log(`Listening on port: ${port}!`))
+//Slanje podataka o gradu
+app.post('/city', async (req , res) =>{
+    let db = await connect();
+
+    let cityData = req.body;
+    
+    let result = await db.collection('cities').insertOne(cityData);
+    if (result.insertedCount == 1) {
+        res.send({
+            status: 'success',
+            id: result.insertedId,
+        });
+    } 
+    else {
+        res.send({
+            status: 'fail',
+        });
+    }
+
+    console.log(result);
+
+});
+
+app.listen(port, () => console.log(`Listening on port: ${port}!`)) 

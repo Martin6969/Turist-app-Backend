@@ -12,12 +12,11 @@ await db.collection("users").createIndex({email: 1}, {unique: true});
 
 export default {
    async registerUser(user){
-        console.log( 'Welcome: ', user);
+        console.log( 'Hello ', user, "!");
         let db = await connect();
 
         let doc = {
             name: user.name,
-            username: user.username,
             email: user.email,
             password: await bcrypt.hash(user.password, 6),
         };
@@ -30,7 +29,7 @@ export default {
         }
         catch(e){
             if(e.name == "MongoError" || e.code == 11000){
-                throw new Error("User with email already exists!")
+                throw new Error("User has same email!")
             }
         }
 
