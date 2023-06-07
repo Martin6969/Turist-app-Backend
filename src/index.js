@@ -57,7 +57,7 @@ app.post('/city', async (req , res) =>{
     let db = await connect();
 
     let cityData = req.body;
-    
+
     let result = await db.collection('cities').insertOne(cityData);
     if (result.insertedCount == 1) {
         res.send({
@@ -75,4 +75,14 @@ app.post('/city', async (req , res) =>{
 
 });
 
-app.listen(port, () => console.log(`Listening on port: ${port}!`)) 
+//Dohvat svih gradova iz baze
+app.get('/cities', async (req , res) =>{
+    let db = await connect();
+
+    let cursor = await db.collection('cities').find({});
+    let cities = await cursor.toArray();
+    
+    res.json(cities);
+});
+
+app.listen(port, () => console.log(`Slušam na portu: ${port}!`)) 
