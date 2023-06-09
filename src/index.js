@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 //Registracija
-app.post('/user', async (req , res) =>{
+app.post('/korisnik', async (req , res) =>{
     let userData = req.body;
     let id;
     try{
@@ -26,7 +26,7 @@ app.post('/user', async (req , res) =>{
 });
 
 //Prijava
-app.post('/login', async (req, res) =>{
+app.post('/prijava', async (req, res) =>{
     let user = await req.body;
     let userEmail = user.email 
     let userPassword = user.password 
@@ -41,7 +41,7 @@ app.post('/login', async (req, res) =>{
 })
 
 //Dohvat svih korisnika iz baze
-app.get('/users', async (req , res) =>{
+app.get('/korisnici', async (req , res) =>{
     let db = await connect();
     let cursor = await db.collection('users').find({});
     let results = await cursor.toArray();
@@ -53,7 +53,7 @@ app.get('/secret', [Auth.verify], (req,res) => {
 })
 
 //Slanje podataka o gradu
-app.post('/city', async (req , res) =>{
+app.post('/grad', async (req , res) =>{
     let db = await connect();
 
     let cityData = req.body;
@@ -76,7 +76,7 @@ app.post('/city', async (req , res) =>{
 });
 
 //Dohvat svih gradova iz baze
-app.get('/cities', async (req , res) =>{
+app.get('/gradovi', async (req , res) =>{
     let db = await connect();
 
     let cursor = await db.collection('cities').find({});
@@ -84,5 +84,29 @@ app.get('/cities', async (req , res) =>{
     
     res.json(cities);
 });
+
+app.get('/gradovi/:zupanija', async (req , res) => {
+    let zupanija = req.params.zupanija;
+    let db = await connect();
+
+    console.log("Vrste: ",zupanija)
+    let singleDoc = await db.collection('cities').find({zupanija: zupanija})
+    let results = await singleDoc.toArray();
+    
+   
+    res.json(results)
+});
+
+//app.get('/gradovi/:zupanije', async (req, res) => {
+//    let zupanije = req.params.zupanije.split('_'); // Pretpostavka: županije su odvojene podvlakom (_) u putanji
+//  
+//    let db = await connect();
+//  
+//    console.log("Županije: ", zupanije);
+//  
+//    let gradovi = await db.collection('cities').find({ zupanija: { $in: zupanije } }).toArray();
+//  
+//    res.json(gradovi);
+//  });
 
 app.listen(port, () => console.log(`Slušam na portu: ${port}!`)) 
