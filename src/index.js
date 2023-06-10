@@ -97,16 +97,29 @@ app.get('/gradovi/:zupanija', async (req , res) => {
     res.json(results)
 });
 
-//app.get('/gradovi/:zupanije', async (req, res) => {
-//    let zupanije = req.params.zupanije.split('_'); // Pretpostavka: županije su odvojene podvlakom (_) u putanji
-//  
-//    let db = await connect();
-//  
-//    console.log("Županije: ", zupanije);
-//  
-//    let gradovi = await db.collection('cities').find({ zupanija: { $in: zupanije } }).toArray();
-//  
-//    res.json(gradovi);
-//  });
+app.post('/omiljeni_gradovi', async (req , res) =>{
+    let db = await connect();
+
+    let wishlist = req.body;
+
+    let result = await db.collection('wishlist').insertOne(wishlist);
+    if (result.insertedCount == 1) {
+        res.send({
+            status: 'success',
+            id: result.insertedId,
+        });
+    } 
+    else {
+        res.send({
+            status: 'fail',
+        });
+    }
+
+    console.log(result);
+
+});
+
+
+
 
 app.listen(port, () => console.log(`Slušam na portu: ${port}!`)) 
