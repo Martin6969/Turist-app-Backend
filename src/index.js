@@ -4,6 +4,8 @@ import cors from 'cors';
 import Auth from './auth.js';
 import mongo from 'mongodb';
 
+const { ObjectId } = require('mongodb');
+
 const app = express() 
 const port = 3100;
 
@@ -89,37 +91,71 @@ app.get('/gradovi/:zupanija', async (req , res) => {
     let zupanija = req.params.zupanija;
     let db = await connect();
 
-    console.log("Vrste: ",zupanija)
-    let singleDoc = await db.collection('cities').find({zupanija: zupanija})
+    console.log("Zupanije: ",zupanija);
+    let singleDoc = await db.collection('cities').find({zupanija: zupanija});
+    let results = await singleDoc.toArray();
+    
+    res.json(results);
+});
+
+app.post('/omiljeni_gradovi', async (req, res) => {
+    let db = await connect();
+    let wishlist = req.body;
+  
+    try {
+      await db.collection('wishlist').createIndex({ korisnik: 1, grad: 1 }, { unique: true });
+      let result = await db.collection('wishlist').insertOne(wishlist);
+  
+      if (result.insertedCount == 1) {
+        res.send({
+          status: 'success',
+          id: result.insertedId,
+        });
+      } else {
+        res.send({
+          status: 'fail',
+        });
+      }
+    } catch (error) {
+      if (error.code === 11000) {
+        res.send({
+          status: 'fail',
+          message: 'Korisnik već ima unesen taj grad.',
+        });
+      } else {
+        console.error('Greška:', error);
+        res.send({
+          status: 'fail',
+        });
+      }
+    }
+  });
+
+app.get('/omiljeni_gradovi/:korisnik', async (req , res) => {
+    let korisnik = req.params.korisnik;
+    let db = await connect();
+
+    console.log(korisnik)
+    let singleDoc = await db.collection('wishlist').find({korisnik: korisnik})
     let results = await singleDoc.toArray();
     
    
     res.json(results)
 });
 
-app.post('/omiljeni_gradovi', async (req , res) =>{
-    let db = await connect();
-
-    let wishlist = req.body;
-
-    let result = await db.collection('wishlist').insertOne(wishlist);
-    if (result.insertedCount == 1) {
-        res.send({
-            status: 'success',
-            id: result.insertedId,
-        });
-    } 
-    else {
-        res.send({
-            status: 'fail',
-        });
-    }
-
-    console.log(result);
-
+app.post("/omiljeni_gradovi/delete/:id", async (req, res) => {
+    
+	let id = req.params.id;
+	let db = await connect();
+	let result = await db.collection("wishlist").deleteOne({ _id: ObjectId(id) });
+	if (result && result.deletedCount == 1) {
+		res.json(result);
+	} else {
+		res.json({
+			status: "fail",
+		});
+	}
 });
-
-
 
 
 app.listen(port, () => console.log(`Slušam na portu: ${port}!`)) 
