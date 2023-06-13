@@ -7,7 +7,7 @@ import mongo from 'mongodb';
 const { ObjectId } = require('mongodb');
 
 const app = express() 
-const port = 3100;
+const port = process.env.PORT || 3100;
 
 app.use(cors());
 app.use(express.json());
